@@ -79,7 +79,7 @@
         },
         "yaml.schemas": {
           "type": "object",
-          "default": {},
+          "default": {"file:///c:/dev/yaml/vscode-yaml.git/correlator-config-schema.json": "/*"},
           "description": "Associate schemas to Yaml files in the current workspace"
         },
         "yaml.format.enable": {
