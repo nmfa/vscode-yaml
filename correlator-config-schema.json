@@ -38,10 +38,73 @@
                 "required": [ "transport", "managerConfig" ],
                 "additionalProperties": false
             }
+        },
+
+        "dynamicChains": {
+            "description": "Map used to provide chain definitions that are used by chain manager plug-ins or EPL code that dynamically create chain instances after the correlator has started.",
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": [
+                    {
+                        "anyOf": [
+                            {"$ref": "#/definitions/apama.eventMap"},
+                            {"$ref": "#/definitions/apama.eventString"}
+                        ]
+                    }
+                ]
+            }
         }
     },
 
     "definitions": {
+        "apama.eventMap": {
+            "type": "object",
+            "properties": {
+                "apama.eventMap": {
+                    "type": "object",
+                    "description": "The eventMap plug-in translates EPL events to and from nested maps, which allows chains to convert arbitrary structured data into forms that can be automatically translated into EPL events without having to know the exact definition of the EPL event, provided the field names of the event definition match the keys in the map.",
+                    "properties": {
+                        "subscribeChannels": {
+                            "type": "string",
+                            "description": "Defines the channel or channels to which the chain subscribes in order to receive events from the correlator."
+                        },
+                        "defaultChannel": {
+                            "type": "string",
+                            "description": "Defines the default channel to deliver events from the transport to the correlator from the chain."
+                        },
+                        "suppressLoopback": {
+                            "type": "boolean",
+                            "description": " If set to true, any events which will be received by this chain will not also be sent to contexts subscribed to the same channel."
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "A textual description which will appear in the Management interface"
+                        },
+                        "remoteAddress": {
+                            "type": "string",
+                            "description": "A textual address for the remote component (if any) to which this chain connects."
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false,
+            "required": [ "apama.eventMap" ]
+        },
+
+        "apama.eventString": {
+            "type": "object",
+            "properties": {
+                "apama.eventString": {
+                    "type": "string",
+                    "description": "The eventString plug-in transfers events in Apama string event format, as used by the engine_send and engine_receive tools and the Apama client library."
+                }
+            },
+            "additionalProperties": false,
+            "required": [ "apama.eventString" ]
+        },
+
         "HTTPServerTransportConfig": {
             "type": "object",
             "properties": {
@@ -80,23 +143,27 @@
                 },
                 "staticFiles": {
                     "description": "Map of static files.",
-                    "propertyNames": {
-                        "pattern": "^[/]"
+                    "patternProperties": {
+                        "^[/]": {
+                            "type": "object",
+                            "properties": {
+                                "file": { "type": "string" },
+                                "contentType": { "type": "string" },
+                                "charset": { "type": "string" }
+                            },
+                            "required": [ "file", "contentType" ],
+                            "additionalProperties": false
+                        }
                     },
-                    "additionalProperties": {
-                        "type": "object",
-                        "properties": {
-                            "file": { "type": "string" },
-                            "contentType": { "type": "string" },
-                            "charset": { "type": "string" }
-                        },
-                        "required": [ "file", "contentType" ],
-                        "additionalProperties": false
-                    }
+                    "additionalProperties": false
                 }
             },
             "required": [ "port" ],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "if": {
+                "tls": true
+            },
+            "then": { "required": [ "tlsCertificateFile", "tlsKeyFile" ] }
         },
 
         "C++Plugin": {
